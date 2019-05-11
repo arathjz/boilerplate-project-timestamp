@@ -6,27 +6,51 @@ var express = require('express');
 var app = express();
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-// so that your API is remotely testable by FCC 
+// so that your API is remotely testable by FCC
 var cors = require('cors');
-app.use(cors({optionSuccessStatus: 200}));  // some legacy browsers choke on 204
+app.use(cors({ optionSuccessStatus: 200 })); // some legacy browsers choke on 204
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 
 // http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/index.html');
+app.get('/', function(req, res) {
+	res.sendFile(__dirname + '/views/index.html');
 });
 
-
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+// your first API endpoint...
+app.get('/api/hello', function(req, res) {
+	res.json({ greeting: 'hello API' });
 });
 
+// Timestamp api options
+app.get('/api/timestamp/:date_string', (req, res) => {
+	const { params: { date_string } } = req;
+	let date;
+	if (date_string.includes('-')) {
+		date = date_string;
+	} else {
+		date = Number(date_string);
+	}
+	date = new Date(date);
 
+	let response = {};
+
+	if (date == 'Invalid Date') {
+		response = { unix: null, utc: 'Invalid Date' };
+	} else {
+		response = { unix: date.getTime(), utc: date.toUTCString() };
+	}
+
+	res.json(response);
+});
+
+app.get('/api/timestamp/', (req, res) => {
+	const response = { unix: new Date().getTime(), utc: new Date().toUTCString() };
+	res.json(response);
+});
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+var listener = app.listen(process.env.PORT, function() {
+	console.log('Your app is listening on port ' + listener.address().port);
 });
